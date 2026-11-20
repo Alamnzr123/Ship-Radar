@@ -23,6 +23,9 @@ Ship Radar is built around a different question: **is this repository safe and u
 - Dedicated watchlist view
 - Side-by-side comparison for up to three repositories
 - Remove repositories or clear the comparison selection
+- Persistent comparison selection across browser refreshes
+- Shareable comparison links
+- JSON export for reproducible team discussions
 
 ## Ship Score
 

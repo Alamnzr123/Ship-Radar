@@ -63,8 +63,22 @@ function App() {
       return []
     }
   })
-  const [compareIds, setCompareIds] = useState<string[]>([])
-  const [view, setView] = useState<'radar' | 'watchlist' | 'compare'>('radar')
+  const [compareIds, setCompareIds] = useState<string[]>(() => {
+    const hashName = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('compare')
+    if (hashName) return hashName.split(',').filter(Boolean).slice(0, 3)
+
+    const saved = window.localStorage.getItem('ship-radar-compare')
+    if (!saved) return []
+    try {
+      const parsed = JSON.parse(saved)
+      return Array.isArray(parsed) ? parsed.filter((name): name is string => typeof name === 'string').slice(0, 3) : []
+    } catch {
+      return []
+    }
+  })
+  const [view, setView] = useState<'radar' | 'watchlist' | 'compare'>(() =>
+    new URLSearchParams(window.location.hash.replace(/^#/, '')).has('compare') ? 'compare' : 'radar')
+  const [shareStatus, setShareStatus] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -111,6 +125,10 @@ function App() {
     window.localStorage.setItem('ship-radar-watchlist', JSON.stringify(watchlist))
   }, [watchlist])
 
+  useEffect(() => {
+    window.localStorage.setItem('ship-radar-compare', JSON.stringify(compareIds))
+  }, [compareIds])
+
   const toggleWatchlist = (fullName: string) => {
     setWatchlist(current => current.includes(fullName)
       ? current.filter(name => name !== fullName)
@@ -121,6 +139,38 @@ function App() {
     setCompareIds(current => current.includes(fullName)
       ? current.filter(name => name !== fullName)
       : current.length < 3 ? [...current, fullName] : current)
+  }
+
+  const copyComparisonLink = async () => {
+    const names = encodeURIComponent(compareIds.join(','))
+    const url = `${window.location.origin}${window.location.pathname}#compare=${names}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setShareStatus('Link copied')
+    } catch {
+      setShareStatus('Copy unavailable')
+    }
+  }
+
+  const exportComparison = () => {
+    const payload = comparedSignals.map(({ repo, score, releasePulse, issueHealth, momentum }) => ({
+      repository: repo.full_name,
+      url: repo.html_url,
+      language: repo.language,
+      shipScore: score,
+      releasePulse,
+      issueHealth,
+      momentum,
+      stars: repo.stargazers_count,
+      forks: repo.forks_count,
+    }))
+    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), repositories: payload }, null, 2)], { type: 'application/json' })
+    const downloadUrl = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = downloadUrl
+    anchor.download = 'ship-radar-comparison.json'
+    anchor.click()
+    URL.revokeObjectURL(downloadUrl)
   }
 
   const comparedSignals = compareIds
@@ -236,6 +286,14 @@ function App() {
                   <a href={signal.repo.html_url} target="_blank" rel="noreferrer">Open GitHub</a>
                 </article>
               ))}
+            </div>
+          )}
+          {comparedSignals.length > 0 && (
+            <div className="sharePanel">
+              <button type="button" className="shareButton" onClick={copyComparisonLink}>
+                {shareStatus || 'Copy link to this comparison'}
+              </button>
+              <button type="button" className="exportButton" onClick={exportComparison}>Export JSON</button>
             </div>
           )}
         </section>
