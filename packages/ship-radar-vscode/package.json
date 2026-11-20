@@ -1,0 +1,20 @@
+{
+  "name": "ship-radar-vscode",
+  "displayName": "Ship Radar",
+  "description": "Rank GitHub repositories from VS Code.",
+  "version": "0.1.0",
+  "publisher": "Alamnzr123",
+  "license": "MIT",
+  "engines": { "vscode": "^1.95.0" },
+  "categories": ["Other"],
+  "activationEvents": [],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ship-radar.rankRepository",
+        "title": "Ship Radar: Rank Repository"
+      }
+    ]
+  }
+}

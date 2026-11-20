@@ -63,6 +63,17 @@ The deployable static files are written to `dist`.
 
 No environment secret is required for the current unauthenticated GitHub API preview. A GitHub token must not be placed in browser code. Future authenticated access requires a server or serverless proxy.
 
+## Command-line use
+
+The package source includes a CLI:
+
+```bash
+npx ship-radar owner/repository
+npx ship-radar facebook/react microsoft/vscode --json
+```
+
+The package source is in `packages/ship-radar-cli`. It is not published until an npm account and package name are explicitly confirmed.
+
 ## Roadmap
 
 The next useful release is a command-line tool that reads repository names and returns the same ranking signals as the web app. It should support JSON output and require no browser session.

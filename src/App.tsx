@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { calculateShipScore } from '../shared/ship-radar.mjs'
 import './App.css'
 
 interface Repo {
@@ -37,13 +38,16 @@ const seedRepos: Repo[] = [
 const compact = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n)
 
 function buildSignal(repo: Repo, index: number): RepoSignal {
-  const ageHours = Math.max(1, (Date.now() - new Date(repo.pushed_at).getTime()) / 36e5)
-  const releasePulse = Math.max(18, Math.min(99, 100 - ageHours * 1.3 + index * 2))
-  const issueHealth = repo.open_issues_count > 0 ? Math.max(20, 88 - repo.open_issues_count * 1.2) : 92
-  const momentum = Math.min(99, 38 + Math.log10(repo.stargazers_count + 10) * 8 + Math.log10(repo.forks_count + 10) * 4)
-  const score = Math.round(releasePulse * 0.4 + issueHealth * 0.25 + momentum * 0.35)
+  const signals = calculateShipScore(repo)
   const spark = [32, 38, 35, 48, 44, 57, 54, 66, 63, 72, 68, 79].map((n, i) => n + ((index + i) % 4) * 3)
-  return { repo, score, releasePulse: Math.round(releasePulse), issueHealth: Math.round(issueHealth), momentum: Math.round(momentum), spark }
+  return {
+    repo,
+    score: signals.score,
+    releasePulse: signals.releasePulse,
+    issueHealth: signals.issueHealth,
+    momentum: signals.momentum,
+    spark,
+  }
 }
 
 function App() {

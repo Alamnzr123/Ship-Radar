@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test Ship Score
+        run: npm test
+
       - name: Build
         env:
           GITHUB_PAGES: true

@@ -1,0 +1,32 @@
+{
+  "name": "ship-radar",
+  "version": "0.1.0",
+  "description": "Rank GitHub repositories using release pulse, issue health, and community momentum.",
+  "type": "module",
+  "bin": {
+    "ship-radar": "bin/ship-radar.js"
+  },
+  "files": [
+    "bin",
+    "shared",
+    "README.md",
+    "LICENSE"
+  ],
+  "license": "MIT",
+  "author": "Alamnzr123",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alamnzr123/Ship-Radar.git"
+  },
+  "homepage": "https://alamnzr123.github.io/Ship-Radar/",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "github",
+    "repository",
+    "developer-tools",
+    "cli",
+    "ranking"
+  ]
+}
