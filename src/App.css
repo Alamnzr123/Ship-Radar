@@ -87,6 +87,16 @@ nav a span {
     11px "DM Mono",
     monospace;
 }
+nav .navButton {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #65655e;
+  cursor: pointer;
+  position: relative;
+}
+nav .navButton.active { color: var(--ink); font-weight: 700; }
+nav .navButton.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--accent); }
 .source {
   font:
     12px "DM Mono",
@@ -440,6 +450,9 @@ footer {
     monospace;
   text-transform: uppercase;
 }
+.detailActions { display: flex; align-items: center; gap: 10px; }
+.watchButton { height: 30px; border: 1px solid var(--line); background: var(--paper); padding: 0 10px; cursor: pointer; color: var(--ink); }
+.watchButton.saved { border-color: var(--accent); color: var(--accent); }
 @media (max-width: 900px) {
   main {
     border-inline: 0;

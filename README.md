@@ -18,6 +18,9 @@ Ship Radar is built around a different question: **is this repository safe and u
 - Preview mode when GitHub is rate limited or unavailable
 - Responsive mobile layout
 - Empty search state
+- Persistent local watchlist
+- One-click save and remove from repository details
+- Dedicated watchlist view
 
 ## Ship Score
 

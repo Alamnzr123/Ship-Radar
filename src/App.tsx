@@ -53,6 +53,17 @@ function App() {
   const [period, setPeriod] = useState('This week')
   const [status, setStatus] = useState<'live' | 'loading' | 'demo'>('demo')
   const [selected, setSelected] = useState<string>('ship-labs/openagents')
+  const [watchlist, setWatchlist] = useState<string[]>(() => {
+    const saved = window.localStorage.getItem('ship-radar-watchlist')
+    if (!saved) return []
+    try {
+      const parsed = JSON.parse(saved)
+      return Array.isArray(parsed) ? parsed.filter((name): name is string => typeof name === 'string') : []
+    } catch {
+      return []
+    }
+  })
+  const [view, setView] = useState<'radar' | 'watchlist'>('radar')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -84,9 +95,26 @@ function App() {
       .sort((a, b) => b.score - a.score)
   }, [repos, language, query])
 
+  const visibleSignals = useMemo(() => {
+    if (view === 'watchlist') {
+      return signals.filter(({ repo }) => watchlist.includes(repo.full_name))
+    }
+    return signals
+  }, [signals, view, watchlist])
+
   const languages = ['All languages', ...Array.from(new Set(repos.map(repo => repo.language).filter(Boolean))) as string[]]
-  const active = signals.find(({ repo }) => repo.full_name === selected)?.repo ?? signals[0]?.repo
+  const active = visibleSignals.find(({ repo }) => repo.full_name === selected)?.repo ?? visibleSignals[0]?.repo
   const activeSignal = active ? buildSignal(active, repos.indexOf(active)) : null
+
+  useEffect(() => {
+    window.localStorage.setItem('ship-radar-watchlist', JSON.stringify(watchlist))
+  }, [watchlist])
+
+  const toggleWatchlist = (fullName: string) => {
+    setWatchlist(current => current.includes(fullName)
+      ? current.filter(name => name !== fullName)
+      : [...current, fullName])
+  }
 
   return (
     <main>
@@ -96,8 +124,8 @@ function App() {
           <span>Ship Radar</span>
         </a>
         <nav aria-label="Primary navigation">
-          <a className="active" href="#radar">Radar</a>
-          <a href="#watchlist">Watchlist <span>0</span></a>
+          <button type="button" className={view === 'radar' ? 'navButton active' : 'navButton'} onClick={() => setView('radar')}>Radar</button>
+          <button type="button" className={view === 'watchlist' ? 'navButton active' : 'navButton'} onClick={() => setView('watchlist')}>Watchlist <span>{watchlist.length}</span></button>
           <a href="#method">Method</a>
         </nav>
         <span className={`source ${status}`}><b />{status === 'live' ? 'Live GitHub' : status === 'loading' ? 'Refreshing' : 'Preview data'}</span>
@@ -122,8 +150,8 @@ function App() {
 
       <section className="dashboard" id="radar">
         <div className="listPanel">
-          <div className="panelHeading"><span>Ranked signals</span><span>{signals.length} repositories</span></div>
-          {signals.length === 0 ? <div className="empty"><b>No matching ships</b><p>Try a broader search or language.</p></div> : signals.map((signal, index) => (
+          <div className="panelHeading"><span>{view === 'watchlist' ? 'Saved repositories' : 'Ranked signals'}</span><span>{visibleSignals.length} repositories</span></div>
+          {visibleSignals.length === 0 ? <div className="empty"><b>{view === 'watchlist' ? 'Your watchlist is empty' : 'No matching ships'}</b><p>{view === 'watchlist' ? 'Save repositories from the Radar to track them here.' : 'Try a broader search or language.'}</p></div> : visibleSignals.map((signal, index) => (
             <button className={`repoRow ${active?.full_name === signal.repo.full_name ? 'selected' : ''}`} key={signal.repo.id} onClick={() => setSelected(signal.repo.full_name)}>
               <span className="rank">{String(index + 1).padStart(2, '0')}</span>
               <span className="repoMain">
@@ -138,7 +166,15 @@ function App() {
 
         {activeSignal && (
           <aside className="detailPanel" aria-label="Repository signal detail">
-            <div className="detailTop"><span>Deep signal</span><a href={activeSignal.repo.html_url} target="_blank" rel="noreferrer">Open on GitHub ↗</a></div>
+            <div className="detailTop">
+              <span>Deep signal</span>
+              <span className="detailActions">
+                <button type="button" className={watchlist.includes(activeSignal.repo.full_name) ? 'watchButton saved' : 'watchButton'} onClick={() => toggleWatchlist(activeSignal.repo.full_name)}>
+                  {watchlist.includes(activeSignal.repo.full_name) ? 'Saved' : 'Save'}
+                </button>
+                <a href={activeSignal.repo.html_url} target="_blank" rel="noreferrer">Open GitHub</a>
+              </span>
+            </div>
             <div className="detailTitle">
               <span className="avatar">{activeSignal.repo.owner.login.slice(0, 2).toUpperCase()}</span>
               <div><p>{activeSignal.repo.owner.login}</p><h2>{activeSignal.repo.name}</h2></div>
