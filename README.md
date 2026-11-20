@@ -1,77 +1,83 @@
 # Ship Radar
 
-Ship Radar is a live repository discovery tool for developers. It ranks GitHub projects using signals that indicate practical usefulness: release pulse, issue health, and community momentum.
+Ship Radar helps developers find GitHub repositories worth evaluating. It ranks live repository search results using release activity, issue health, and community momentum instead of relying on star count alone.
 
-## Why it exists
-
-GitHub Trending mostly treats raw star growth as discovery. That misses projects with good maintenance, active releases, healthy issue discussions, or a poor fit for a developer's stack.
-
-Ship Radar is built around a different question: **is this repository safe and useful to evaluate now?**
-
-## MVP features
+## Features
 
 - Live GitHub repository search
-- Time and language filters
-- Ranked repository detail view
-- Release, issue, and momentum scoring
-- Five-minute refresh behavior
-- Preview mode when GitHub is rate limited or unavailable
-- Responsive mobile layout
-- Empty search state
-- Persistent local watchlist
-- One-click save and remove from repository details
-- Dedicated watchlist view
-- Side-by-side comparison for up to three repositories
-- Remove repositories or clear the comparison selection
-- Persistent comparison selection across browser refreshes
+- Daily, weekly, and monthly discovery periods
+- Language and text filters
+- A reproducible Ship Score
+- Persistent watchlist
+- Side-by-side comparison of up to three repositories
 - Shareable comparison links
-- JSON export for reproducible team discussions
+- JSON exports for team discussions
+- Responsive discovery interface
+- Preview data when GitHub API access is unavailable
 
 ## Ship Score
 
-The MVP score is transparent and reproducible:
+The Ship Score is a prioritization aid, not a quality guarantee.
 
-- 40% release pulse
-- 25% issue health
-- 35% community momentum
+- 40 percent release pulse
+- 25 percent issue health
+- 35 percent community momentum
 
-The score should not be presented as a quality guarantee. It is a prioritization aid for manual review.
+The calculation is visible in the interface and may change as the project matures. Public methodology and tests should accompany any future production scoring model.
 
 ## Run locally
+
+Requirements: Node.js 20 or newer.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the URL shown by Vite.
+Open the local address printed by Vite.
 
-## Build
+## Production build
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Growth plan
-
-1. Ship a read-only MVP that works without authentication.
-2. Publish public demo data or screenshots and one documented use case.
-3. Ask developer communities for one missing signal, not general feedback.
-4. Add watchlists, signed-in alerts, RSS feeds, and optional GitHub API tokens.
-5. Publish a public methodology and API so the ranking can be inspected.
-6. Build integrations as developer demand appears: VS Code, CLI, MCP, Slack, and Linear.
-
-## Unique expansion ideas
-
-- A VS Code command that ranks repositories based on a project's package manifest.
-- A repository comparison view for choosing between alternatives.
-- Watch-only alerts for maintainer response, first release, or issue backlog changes.
-- Reproducible score exports for engineering teams.
+The deployable static files are written to `dist`.
 
 ## Deploy
 
-Any static host works. For GitHub Pages, configure the repository owner and branch in a static deployment workflow. For Vercel or Netlify, use `npm run build` and `dist` as the output directory.
+### GitHub Pages
+
+1. Open repository Settings.
+2. Open Pages.
+3. Choose GitHub Actions as the deployment source.
+4. Add a workflow that runs `npm ci`, `npm run build`, and uploads `dist`.
+5. Set Vite's base path to `/Ship-Radar/` if the site is deployed at `https://alamnzr123.github.io/Ship-Radar/`.
+
+### Vercel or Netlify
+
+- Build command: `npm run build`
+- Output directory: `dist`
+- Install command: `npm install`
+
+No environment secret is required for the current unauthenticated GitHub API preview. A GitHub token must not be placed in browser code. Future authenticated access requires a server or serverless proxy.
+
+## Roadmap
+
+The next useful release is a command-line tool that reads repository names and returns the same ranking signals as the web app. It should support JSON output and require no browser session.
+
+After the CLI establishes a portable public interface, development will continue with:
+
+- A VS Code extension for repository comparison
+- Package manifest based recommendations
+- Watchlist change notifications
+- Reproducible methodology tests
+- A public API for third-party integrations
+
+## Repository visibility
+
+The source is public at `https://github.com/Alamnzr123/Ship-Radar`.
 
 ## License
 
