@@ -21,6 +21,8 @@ Ship Radar is built around a different question: **is this repository safe and u
 - Persistent local watchlist
 - One-click save and remove from repository details
 - Dedicated watchlist view
+- Side-by-side comparison for up to three repositories
+- Remove repositories or clear the comparison selection
 
 ## Ship Score
 
@@ -67,3 +69,7 @@ npm run preview
 ## Deploy
 
 Any static host works. For GitHub Pages, configure the repository owner and branch in a static deployment workflow. For Vercel or Netlify, use `npm run build` and `dist` as the output directory.
+
+## License
+
+MIT License. Copyright (c) 2026 Alamnzr123.

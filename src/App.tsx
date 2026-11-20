@@ -63,7 +63,8 @@ function App() {
       return []
     }
   })
-  const [view, setView] = useState<'radar' | 'watchlist'>('radar')
+  const [compareIds, setCompareIds] = useState<string[]>([])
+  const [view, setView] = useState<'radar' | 'watchlist' | 'compare'>('radar')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -116,6 +117,16 @@ function App() {
       : [...current, fullName])
   }
 
+  const toggleCompare = (fullName: string) => {
+    setCompareIds(current => current.includes(fullName)
+      ? current.filter(name => name !== fullName)
+      : current.length < 3 ? [...current, fullName] : current)
+  }
+
+  const comparedSignals = compareIds
+    .map(fullName => signals.find(({ repo }) => repo.full_name === fullName))
+    .filter((signal): signal is RepoSignal => Boolean(signal))
+
   return (
     <main>
       <header className="topbar">
@@ -126,6 +137,7 @@ function App() {
         <nav aria-label="Primary navigation">
           <button type="button" className={view === 'radar' ? 'navButton active' : 'navButton'} onClick={() => setView('radar')}>Radar</button>
           <button type="button" className={view === 'watchlist' ? 'navButton active' : 'navButton'} onClick={() => setView('watchlist')}>Watchlist <span>{watchlist.length}</span></button>
+          <button type="button" className={view === 'compare' ? 'navButton active' : 'navButton'} onClick={() => setView('compare')}>Compare <span>{compareIds.length}</span></button>
           <a href="#method">Method</a>
         </nav>
         <span className={`source ${status}`}><b />{status === 'live' ? 'Live GitHub' : status === 'loading' ? 'Refreshing' : 'Preview data'}</span>
@@ -139,14 +151,16 @@ function App() {
         <p className="introCopy">A live signal for developers choosing tools, libraries, and communities. Less vanity stars. More evidence of momentum.</p>
       </section>
 
-      <section className="controls" aria-label="Discovery controls">
-        <label className="search">
-          <span aria-hidden="true">⌕</span>
-          <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search a repo, tool, or problem" />
-        </label>
-        <label><span className="srOnly">Time period</span><select value={period} onChange={event => setPeriod(event.target.value)}>{['Today', 'This week', 'This month'].map(value => <option key={value}>{value}</option>)}</select></label>
-        <label><span className="srOnly">Language</span><select value={language} onChange={event => setLanguage(event.target.value)}>{languages.map(value => <option key={value}>{value}</option>)}</select></label>
-      </section>
+      {view !== 'compare' && (
+        <section className="controls" aria-label="Discovery controls">
+          <label className="search">
+            <span aria-hidden="true">⌕</span>
+            <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search a repo, tool, or problem" />
+          </label>
+          <label><span className="srOnly">Time period</span><select value={period} onChange={event => setPeriod(event.target.value)}>{['Today', 'This week', 'This month'].map(value => <option key={value}>{value}</option>)}</select></label>
+          <label><span className="srOnly">Language</span><select value={language} onChange={event => setLanguage(event.target.value)}>{languages.map(value => <option key={value}>{value}</option>)}</select></label>
+        </section>
+      )}
 
       <section className="dashboard" id="radar">
         <div className="listPanel">
@@ -172,6 +186,9 @@ function App() {
                 <button type="button" className={watchlist.includes(activeSignal.repo.full_name) ? 'watchButton saved' : 'watchButton'} onClick={() => toggleWatchlist(activeSignal.repo.full_name)}>
                   {watchlist.includes(activeSignal.repo.full_name) ? 'Saved' : 'Save'}
                 </button>
+                <button type="button" className={compareIds.includes(activeSignal.repo.full_name) ? 'compareButton selected' : 'compareButton'} onClick={() => toggleCompare(activeSignal.repo.full_name)}>
+                  {compareIds.includes(activeSignal.repo.full_name) ? 'Added' : 'Compare'}
+                </button>
                 <a href={activeSignal.repo.html_url} target="_blank" rel="noreferrer">Open GitHub</a>
               </span>
             </div>
@@ -191,6 +208,38 @@ function App() {
           </aside>
         )}
       </section>
+
+      {view === 'compare' && (
+        <section className="compareView" aria-label="Repository comparison">
+          <div className="compareHeading">
+            <div><p className="kicker">Side-by-side evaluation</p><h2>Compare up to three repositories</h2></div>
+            <button type="button" className="clearButton" onClick={() => setCompareIds([])} disabled={compareIds.length === 0}>Clear selection</button>
+          </div>
+          {comparedSignals.length === 0 ? (
+            <div className="compareEmpty"><b>No repositories selected</b><p>Open Radar and select Compare on repository details.</p><button type="button" onClick={() => setView('radar')}>Return to Radar</button></div>
+          ) : (
+            <div className="compareGrid" style={{ '--compare-count': comparedSignals.length } as CSSProperties}>
+              {comparedSignals.map(signal => (
+                <article className="compareCard" key={signal.repo.full_name}>
+                  <button type="button" className="removeCompare" onClick={() => toggleCompare(signal.repo.full_name)} aria-label={`Remove ${signal.repo.full_name} from comparison`}>×</button>
+                  <p>{signal.repo.owner.login}</p>
+                  <h3>{signal.repo.name}</h3>
+                  <b className="compareScore">{signal.score}<small>/100</small></b>
+                  <dl>
+                    <div><dt>Release pulse</dt><dd>{signal.releasePulse}</dd></div>
+                    <div><dt>Issue health</dt><dd>{signal.issueHealth}</dd></div>
+                    <div><dt>Momentum</dt><dd>{signal.momentum}</dd></div>
+                    <div><dt>Stars</dt><dd>{compact(signal.repo.stargazers_count)}</dd></div>
+                    <div><dt>Forks</dt><dd>{compact(signal.repo.forks_count)}</dd></div>
+                    <div><dt>Language</dt><dd>{signal.repo.language ?? 'Mixed'}</dd></div>
+                  </dl>
+                  <a href={signal.repo.html_url} target="_blank" rel="noreferrer">Open GitHub</a>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       <footer id="method"><span>SHIP SCORE = 40% release pulse + 25% issue health + 35% community momentum</span><span>Updated every 5 minutes</span></footer>
     </main>

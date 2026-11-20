@@ -95,8 +95,19 @@ nav .navButton {
   cursor: pointer;
   position: relative;
 }
-nav .navButton.active { color: var(--ink); font-weight: 700; }
-nav .navButton.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: var(--accent); }
+nav .navButton.active {
+  color: var(--ink);
+  font-weight: 700;
+}
+nav .navButton.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: var(--accent);
+}
 .source {
   font:
     12px "DM Mono",
@@ -450,9 +461,35 @@ footer {
     monospace;
   text-transform: uppercase;
 }
-.detailActions { display: flex; align-items: center; gap: 10px; }
-.watchButton { height: 30px; border: 1px solid var(--line); background: var(--paper); padding: 0 10px; cursor: pointer; color: var(--ink); }
-.watchButton.saved { border-color: var(--accent); color: var(--accent); }
+.detailActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.watchButton {
+  height: 30px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: 0 10px;
+  cursor: pointer;
+  color: var(--ink);
+}
+.watchButton.saved {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.compareButton, .clearButton { height: 30px; border: 1px solid var(--line); background: var(--paper); padding: 0 10px; cursor: pointer; color: var(--ink); }
+.compareButton.selected { border-color: var(--accent); color: var(--accent); }
+.clearButton:disabled { opacity: 0.45; cursor: default; }
+.compareView { min-height: 620px; padding: 32px 38px 38px; }
+.compareHeading { display: flex; justify-content: space-between; align-items: end; border-bottom: 1px solid var(--line); padding-bottom: 20px; }
+.compareHeading h2 { margin: 0; font-size: 32px; letter-spacing: -0.04em; }
+.compareEmpty { min-height: 430px; display: grid; place-content: center; text-align: center; color: var(--muted); }
+.compareEmpty b { color: var(--ink); font-size: 18px; }.compareEmpty p { margin: 8px 0 18px; }.compareEmpty button { height: 38px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer; }
+.compareGrid { display: grid; grid-template-columns: repeat(var(--compare-count), minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+.compareCard { position: relative; min-width: 0; border: 1px solid var(--line); padding: 24px; background: #f4f2e9; }.compareCard p { margin: 0 0 4px; color: var(--muted); font-size: 12px; }.compareCard h3 { margin: 0 0 18px; font-size: 21px; }
+.removeCompare { position: absolute; right: 10px; top: 8px; width: 28px; height: 28px; border: 0; background: transparent; font-size: 20px; cursor: pointer; }
+.compareScore { display: block; font-size: 46px; letter-spacing: -0.06em; }.compareScore small { font: 10px 'DM Mono', monospace; color: var(--muted); }.compareCard dl { margin: 22px 0; }.compareCard dl div { display:flex; justify-content:space-between; border-top:1px solid var(--line); padding:9px 0; }.compareCard dt { color:var(--muted); font-size:12px }.compareCard dd { margin:0; font:12px 'DM Mono', monospace }.compareCard>a { display:inline-flex; height:38px; align-items:center; border-bottom:1px solid var(--ink); text-decoration:none; font-size:12px }
 @media (max-width: 900px) {
   main {
     border-inline: 0;
